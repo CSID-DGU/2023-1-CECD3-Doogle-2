@@ -5,6 +5,9 @@ const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
 const call = document.getElementById("call");
+const startBtn = document.getElementById("start-btn");
+const finishBtn = document.getElementById("finish-btn");
+const downloadBtn = document.getElementById("download-btn");
 
 call.hidden = true;
 
@@ -13,6 +16,8 @@ let muted = false;
 let cameraOff = false;
 let roomName;
 let myPeerConnection;
+let mediaRecorder = null;
+let recordedMediaUrl = null;
 
 async function getCameras() {
   try {
@@ -95,6 +100,51 @@ async function handleCameraChange() {
 muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
 camerasSelect.addEventListener("input", handleCameraChange);
+startBtn.addEventListener("click", function(){
+  let mediaData = [];
+  
+  // 1. MediaStream을 매개변수로 MediaRecorder 생성자를 호출
+  mediaRecorder = new MediaRecorder(myStream, {
+    mimeType: "video/webm; codecs=vp9"
+  });
+
+  // 2. 전달받는 데이터를 처리하는 이벤트 핸들러 등록
+  mediaRecorder.ondataavailable = function(event){
+    if(event.data && event.data.size > 0){
+      mediaData.push(event.data);
+    }
+  }
+  
+  // 3. 녹화 중지 이벤트 핸들러 등록
+  mediaRecorder.onstop = function(){
+    const blob = new Blob(mediaData, {type: "video/webm"});
+    recordedMediaUrl = window.URL.createObjectURL(blob); // "window." 추가
+  }
+  
+  // 4. 녹화 시작
+  mediaRecorder.start();
+})
+
+finishBtn.addEventListener("click", function(){
+  if(mediaRecorder){
+    // 5. 녹화 중지
+    mediaRecorder.stop();
+    mediaRecorder = null;
+  }
+})
+
+downloadBtn.addEventListener("click", function () {
+  if (recordedMediaUrl) { // 수정: recordedMediaURL -> recordedMediaUrl
+    const link = document.createElement("a");
+    document.body.appendChild(link);
+    // 녹화된 영상의 URL을 href 속성으로 설정
+    link.href = recordedMediaUrl; // 수정: recordedMediaURL -> recordedMediaUrl
+    // 저장할 파일명 설정
+    link.download = "video.webm";
+    link.click();
+    document.body.removeChild(link);
+  }
+});
 
 
 const welcome = document.getElementById("welcome");
