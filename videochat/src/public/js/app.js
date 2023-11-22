@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io();  // FastAPI 서버 주소로 업데이트합니다.
 
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
@@ -133,16 +133,24 @@ finishBtn.addEventListener("click", function(){
   }
 })
 
-downloadBtn.addEventListener("click", function () {
-  if (recordedMediaUrl) { // 수정: recordedMediaURL -> recordedMediaUrl
-    const link = document.createElement("a");
-    document.body.appendChild(link);
-    // 녹화된 영상의 URL을 href 속성으로 설정
-    link.href = recordedMediaUrl; // 수정: recordedMediaURL -> recordedMediaUrl
-    // 저장할 파일명 설정
-    link.download = "video.webm";
-    link.click();
-    document.body.removeChild(link);
+document.getElementById("download-btn").addEventListener("click", function () {
+  if (recordedMediaUrl) {
+      const link = document.createElement("a");
+      document.body.appendChild(link);
+      link.href = recordedMediaUrl;
+      link.download = "video.webm";
+      link.click();
+      document.body.removeChild(link);
+
+      // 파일 데이터를 서버로 전송
+      const formData = new FormData();
+      formData.append("video", new Blob([recordedMediaUrl], { type: "video/webm" }));
+
+      // Ajax 또는 fetch를 사용하여 서버에 전송
+      fetch("/uploads", {
+          method: "POST",
+          body: formData
+      });
   }
 });
 

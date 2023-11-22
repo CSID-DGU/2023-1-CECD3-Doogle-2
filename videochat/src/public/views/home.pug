@@ -16,13 +16,38 @@ html(lang="en")
                     button Enter room
             div#call
                 div#myStream
-                    video#myFace(autoplay,playsinline, width="400", height="400")
+                    video#myFace(autoplay, playsinline, width="400", height="400")
                     button#mute Mute
                     button#camera Turn Camera Off
                     button#start-btn Start Recording
                     button#finish-btn Stop Recording
                     button#download-btn Download
                     select#cameras
-                    video#peerFace(autoplay,playsinline, width="400", height="400")
+                    video#peerFace(autoplay, playsinline, width="400", height="400")
         script(src="/socket.io/socket.io.js") 
-        script(src="/public/js/app.js") 
+        script(src="/public/js/app.js")
+        script.
+            document.getElementById("download-btn").addEventListener("click", function () {
+                if (recordedMediaUrl) {
+                    const link = document.createElement("a");
+                    document.body.appendChild(link);
+                    link.href = recordedMediaUrl;
+                    link.download = "video.webm";
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // 파일을 서버로 전송
+                    const formData = new FormData();
+                    formData.append("video", recordedMediaUrl);
+
+                    // Ajax 또는 fetch를 사용하여 서버에 전송
+                    fetch("/uploads", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.error(error));
+                }
+            });
+
