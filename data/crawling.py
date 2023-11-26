@@ -24,26 +24,31 @@ catetory_code = ['CTE00'+str(i) for i in range(1, 17)]
 
 
 print()
-url = 'https://sldict.korean.go.kr/front/sign/signList.do?current_pos_index=&origin_no=0&searchWay=&top_category=&category={}&detailCategory=&searchKeyword=&pageIndex={}&pageJumpIndex='
+url = 'https://sldict.korean.go.kr/front/sign/signList.do?current_pos_index=&origin_no=0&searchWay=&top_category=CTE&category=&detailCategory=&searchKeyword=&pageIndex={}&pageJumpIndex='
 
-ksl_cat_dict = collections.defaultdict()
-
-for cat_cd in tqdm(catetory_code):
-    # category별로 ex.일상
-    ksl_words = []  # ksl 담을 리스트
-    for page_num in tqdm(range(1, 34)):
-        # category 안에서 페이지별로
-        response = requests.get(url.format(cat_cd, page_num))
-        html = response.text
-        soup = BeautifulSoup(html, 'html.parser')
-
-        li_words = soup.select(".tit")
-
-        for words in li_words:
-            ksl_words.append(re.sub(r"[^ㄱ-ㅣ가-힣,]", '', words.text))
-
-        print('category가 ', cat_cd, '일 때, 수어 단어 리스트들 :' , ksl_words)
-
-        ksl_cat_dict[cat_cd] = ksl_words
+#ksl_cat_dict = collections.defaultdict()
 
 
+# category별로 ex.일상
+ksl_words = []  # ksl 담을 리스트
+for page_num in tqdm(range(1, 368)):
+    # category 안에서 페이지별로
+    response = requests.get(url.format(page_num))
+    html = response.text
+    soup = BeautifulSoup(html, 'html.parser')
+
+    li_words = soup.select(".tit")
+
+    for words in li_words:
+        ksl_words.append(re.sub(r"[^ㄱ-ㅣ가-힣,]", '', words.text))
+
+    #ksl_cat_dict[cat_cd] = ksl_words
+
+    #print('category가 ', cat_cd, '일 때, 수어 단어 리스트들 :' , ksl_words)
+
+
+
+#print(ksl_cat_dict)
+#ksl_cat_df = pd.DataFrame.from_dict(ksl_cat_dict, orient='index')
+ksl_cat_df = pd.DataFrame(ksl_words)
+ksl_cat_df.to_csv('./ksl_dictionary.csv')
