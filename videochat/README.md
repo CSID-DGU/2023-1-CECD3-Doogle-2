@@ -1,3 +1,3 @@
-# Noom
+# Room
 
 Zoom Clone using Nodejs, WebRTC and Websockets.
